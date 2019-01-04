@@ -18,7 +18,7 @@
 .equ EXIT_SUCCESS, 0
 .equ EXIT_FAILURE, -1
 
-.equ CAP, 1000
+.equ CAP, 100000
 
 .section .rodata
 	msg1:
@@ -254,11 +254,15 @@ input:
 	movl	$0, loc1(%ebp)
 	jmp	input_cond
 input_for:
-	# A[i]=rand()
+	# A[i]=rand() % CAP
 	call 	rand
+	xorl	%edx, %edx		# edx = 0, MUST be done before divl, otherwise divl gives 'Floating point exception' 
+	movl	$CAP, %ecx		# ecx = CAP (e.g. 1000. Random number generated cannot be greater than CAP)
+	divl	%ecx			# eax = divident, ecx = divisor
+					# eax = quotient, edx = remainder--> important for us
 	movl	loc1(%ebp), %ecx	# ecx = i
 	movl	arg1(%ebp), %ebx	# ebx = Base Address of A
-	movl	%eax, (%ebx, %ecx, 4)	# A[i] = eax = rand()
+	movl	%edx, (%ebx, %ecx, 4)	# A[i] = edx = rand() % CAP
 
 	# debug
 	#movl	$msg1, p1(%esp)
