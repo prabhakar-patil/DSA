@@ -21,19 +21,20 @@
 .equ CAP, 1000
 
 .section .rodata
-	msg:
-		.string	"Hello, World\n"
-	msg2:
+	msg1:
 		.string "A[%d]=%d\n"
-	msg3:	
+	msg2:	
 		.string "A=0x%x A[%d]=%d\n"
 
 	err1:
 		.string "calloc() failed. Cannot allocate memory\n"
 	err2:
 		.string "x_free(): cannot free null pointer\n"
-.section .bss
-	.comm 	arr, 20, 4	# 5 integers = 5 * 4 = 20 bytes
+
+	success_msg:
+		.string	"SUCCESS\n"
+	failure_msg:
+		.string	"FAILURE\n"
 
 .section .text 
 	.globl 	main
@@ -86,6 +87,13 @@ main:
 	movl	%edx, p2(%esp)
 	call	output	
 
+	# test_sort(A,N)
+	movl	loc2(%ebp), %eax	# eax = Base address of A
+	movl	%eax, p1(%esp)		# 1st para to stack
+	movl	loc1(%ebp), %eax	# eax = N
+	movl	%eax, p2(%esp)		# 2nd para to stack
+	call	test_sort
+
 	# x_free(A)
 	movl	loc2(%ebp), %eax
 	movl	%eax, p1(%esp)
@@ -107,9 +115,6 @@ sort:
 	andl	$-16, %esp	# align stack pointer to 16 byte boundary
 	subl	$16, %esp	# Allocate 16 byte stack storage for this function
 	
-	movl	arg1(%ebp), %eax
-	movl	arg2(%ebp), %eax
-
 	# insertion sort functionality
 	# i(local1), j(local2), key(local3)
 
@@ -167,6 +172,66 @@ sort_for_cond:
 	popl	%ebp		# get previous funtion (caller of this function) ebp 
 	ret
 
+.section .rodata
+	str1:
+		.string	"A[%d]=%d, A[%d]=%d\n"
+
+.section .text
+	.globl 	test_sort
+	.type	test_sort, @function
+# void test_sort(int *A, int N)
+
+test_sort:
+	pushl	%ebp		# store caller ebp
+	movl	%esp, %ebp	# bring ebp to current stack top
+
+	andl	$-16, %esp	# align stack pointer to 16 byte boundary
+	subl	$16, %esp	# allocate 16 byte local/stack storage
+
+	# int i = 0
+	movl	$0, loc1(%ebp)
+
+	# ebx = Base address of A
+	movl	arg1(%ebp), %ebx	# dont use ebx for other use
+
+	# for(i=0; i<N-1; i++)
+	jmp	test_sort_for_cond
+test_sort_for:
+	# if (A[i] > A[i+1])
+	# 	break;
+	movl	loc1(%ebp), %eax	# eax = i
+	movl	(%ebx, %eax, 4), %edx	# edx = A[i]
+
+	addl	$1, %eax		# eax = i+1
+
+	cmpl	%edx, (%ebx, %eax, 4)	# A[i+1] - A[i] ? -ve(break the loop, +ve/0(continue loop)
+	jl	test_sort_failure
+	addl	$1, loc1(%ebp)		# i = i+1
+
+test_sort_for_cond:
+	movl	arg2(%ebp), %edx	# edx = N
+	subl	$1, %edx		# edx = N - 1
+	cmpl	%edx, loc1(%ebp)	# i - (N-1) ? -ve(less, continue loop), +ve(break loop)
+	jl	test_sort_for
+	jmp	test_sort_success
+
+test_sort_failure:
+	# printf("FAILURE\n")
+	movl	$failure_msg, p1(%esp)
+	jmp	test_sort_print
+
+test_sort_success:
+	# printf("SUCCESS\n")
+	movl	$success_msg, p1(%esp)
+
+test_sort_print:
+	call	printf
+
+	movl	%ebp, %esp	# discard current function stack
+	popl	%ebp		# retrieve caller ebp
+	ret
+
+
 .section .text
 	.globl	input
 	.type	input, @function
@@ -189,15 +254,14 @@ input:
 	movl	$0, loc1(%ebp)
 	jmp	input_cond
 input_for:
-	#arr[i]=rand()
+	# A[i]=rand()
 	call 	rand
 	movl	loc1(%ebp), %ecx	# ecx = i
-	#movl	%eax, arr(, %ecx, 4)	# A[i] = eax = rand()
 	movl	arg1(%ebp), %ebx	# ebx = Base Address of A
 	movl	%eax, (%ebx, %ecx, 4)	# A[i] = eax = rand()
 
 	# debug
-	#movl	$msg2, p1(%esp)
+	#movl	$msg1, p1(%esp)
 	#movl	%ecx, p2(%esp)
 	#movl	%eax, p3(%esp)
 	#call printf
@@ -234,13 +298,11 @@ output:
 	jmp	output_cond
 output_for:
 	movl	loc1(%ebp), %ecx	# ecx = i
-	#movl	arr(, %ecx, 4), %eax	# eax = A[i]
 	movl	arg1(%ebp), %ebx	# ebx = Base address of A
 	movl	(%ebx, %ecx, 4), %eax   # eax = A[i]
 
-	#print("A[%d]=%d",i, A[i])
 	#print("A=0x%x [%d]=%d",A, i, A[i])
-	movl	$msg3, p1(%esp)
+	movl	$msg2, p1(%esp)
 	leal	(%ebx, %ecx, 4), %edx
 	movl	%edx, p2(%esp)	
 	movl	%ecx, p3(%esp)		
@@ -302,7 +364,9 @@ x_free:
 
 	andl	$-16, %esp	# esp aligned to 16 byte boundary
 	subl	$16, %esp	# create local storage of 16 byte
-
+	
+	# if(A)
+	#  free(A)
 	movl	arg1(%ebp), %eax
 	cmpl	$0, %eax
 	je	x_free_err
