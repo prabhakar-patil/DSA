@@ -29,7 +29,7 @@
 .equ EXIT_SUCCESS, 0
 .equ EXIT_FAILURE, -1
 
-.equ CAP, 1000000
+.equ CAP, 1000000	# <= 1M
 
 .section .rodata
 	msg0:
@@ -157,14 +157,6 @@ sort:
 	ret
 
 # void merge_sort(int A[], int p, int r)
-.section .rodata
-	merge_sort_msg0:
-		.string "Entry merge_sort\n"
-	
-	merge_sort_msg1:
-		.string "Exit merge_sort\n"
-	merge_sort_print:
-		.string "p=%d q=%d r=%d\n"
 .section .text
 	.globl	merge_sort
 	.type	merge_sort, @function
@@ -175,9 +167,6 @@ merge_sort:
 	
 	andl 	$-16, %esp
 	subl	$16, %esp
-
-	movl	$merge_sort_msg0, p1(%esp)
-	call	printf
 
 	# if(p<r)
 	movl	arg2(%ebp), %ecx	# ecx = p
@@ -194,16 +183,6 @@ merge_sort:
 	movl	arg2(%ebp), %ecx	# ecx = p
 	addl	%ecx, %eax		# eax = eax + p = (r-2)/2 + p
 	movl	%eax, loc1(%ebp)	# q = eax
-
-	# debug
-	movl	$merge_sort_print, p1(%esp)
-	movl	arg2(%ebp), %ebx
-	movl	%ebx, p2(%esp)
-	movl	loc1(%ebp), %eax	# q = eax
-	movl	%eax, p3(%esp)
-	movl	arg3(%ebp), %edx
-	movl	%edx, p4(%esp)	
-	call	printf
 
 	# merge_sort(A, p, q)
 	movl	arg1(%ebp), %ebx
@@ -237,36 +216,12 @@ merge_sort:
 	
 ms_out:
 
-	movl	$merge_sort_msg1, p1(%esp)
-	call	printf
-
 	# epilogue
 	movl	%ebp, %esp
 	popl	%ebp
 	ret
 
 # void merge(int A[], int p, int q, int r)
-.section .rodata
-	merge_msg0:
-		.string "Entry Merge\n"
-	
-	merge_msg1:
-		.string "Exit Merge\n"
-	merge_msg2:
-		.string "Copy left done\n"
-	merge_msg3:
-		.string "Copy right done\n"
-	print_Apqr:
-		.string "A=0x%x p=%d q=%d r=%d\n"
-	print_A1:
-		.string "A1[%d]=%d\n"
-	print_A2:
-		.string "A2[%d]=%d\n"
-	print_A1N1:
-		.string "&A1[0]=0x%x N1=%d\n"
-	print_A2N2:
-		.string "&A2[0]=0x%x N2=%d\n"
-
 .section .text 
 	.globl	merge
 	.type	merge, @function
@@ -280,22 +235,7 @@ merge:
 	subl	$64, %esp	# 64 byte local storage, 36 bytes required(4B each)--> i,j,k,fromA1,fromA2, N1, N2, A1[], A2[]
 				# max parameters to function call = 5 x 4B = 20B
 				# 36 + 20 = 56B
-	# debug	
-	movl	$merge_msg0, p1(%esp)
-	call	printf
-
-	# debug
-	movl	$print_Apqr, p1(%esp) 
-	movl	arg1(%ebp), %eax
-	movl	%eax, p2(%esp)
-	movl	arg2(%ebp), %eax
-	movl	%eax, p3(%esp)
-	movl	arg3(%ebp), %eax
-	movl	%eax, p4(%esp)
-	movl	arg4(%ebp), %eax
-	movl	%eax, p5(%esp)
-	call	printf
-	
+		
 	# initialization
 	# fromA1 = fromA2 =FALSE
 	movl	$FALSE, loc4(%ebp)
@@ -311,13 +251,6 @@ merge:
 	call	x_calloc
 	movl	%eax, loc8(%ebp)	# A1 = x_calloc()
 	
-	# debug
-	movl	$print_A1N1, p1(%esp)
-	movl	%eax, p2(%esp)
-	movl	loc6(%ebp), %eax
-	movl	%eax, p3(%esp)
-	call	printf
-
 	# N2 = r-q
 	movl	arg4(%ebp), %eax	# eax = r
 	subl	arg3(%ebp), %eax	# eax = r-q
@@ -328,13 +261,6 @@ merge:
 	call	x_calloc	
 	movl	%eax, loc9(%ebp)	# A2 = x_calloc()
 	
-	# debug
-	movl	$print_A2N2, p1(%esp)
-	movl	%eax, p2(%esp)
-	movl	loc7(%ebp), %eax
-	movl	%eax, p3(%esp)
-	call	printf
-
 	# copy left array in A1[]
 	# int i=0
 	movl	$0, loc1(%ebp)
@@ -352,22 +278,12 @@ m_for1:
 	movl	loc8(%ebp), %ebx
 	movl	%eax, (%ebx, %ecx, 4)	# A1[i] = eax = A[p+i]	
 	
-	# debug
-	movl	$print_A1, p1(%esp)
-	movl	%ecx, p2(%esp)
-	movl	%eax, p3(%esp)
-	call	printf
-
 	addl	$1, loc1(%ebp)
 m_for1_cond:
 	movl	loc1(%ebp), %ecx
 	cmpl	loc6(%ebp), %ecx	# i - N1 ? -ve
 	jl	m_for1		
 
-	# debug
-	movl	$merge_msg2, p1(%esp)
-	call	printf
-	
 	# copy right arry in A2[]
 	# i=0
 	movl	$0, loc1(%ebp)
@@ -383,28 +299,15 @@ m_for2:
 	movl	loc9(%ebp), %ebx	# ebx = &A2[0]
 	movl	%eax, (%ebx, %ecx, 4)	# A2[i] = eax = A[q+i+1]
 
-	# debug
-	# printf("A2[%d]=%d\n", i, A2[i])
-	movl	$print_A2, p1(%esp)
-	movl	%ecx, p2(%esp)
-	movl	%eax, p3(%esp)
-	call 	printf
-
 	addl 	$1, loc1(%ebp)
 m_for2_cond:
 	movl	loc1(%ebp), %ecx
 	cmpl	loc7(%ebp), %ecx	# i - N2 ? -ve
 	jl	m_for2
 
-	# debug
-	movl	$merge_msg3, p1(%esp)
-	call	printf
-
-/*PENDING operations*/
 	# k = p; loc3, index used to point to A[] original buffer
 	# i = 0; loc1, index used to point into A1[]
 	# j = 0; loc2, index used to point into A2[]
-	
 	movl	arg2(%ebp), %eax	
 	movl	%eax, loc3(%ebp)	# k = p
 	movl	$0, loc1(%ebp)		# i = 0
@@ -529,9 +432,6 @@ m_out:
 	movl	%eax, p1(%esp)
 	call	x_free
 
-	movl	$merge_msg1, p1(%esp)
-	call	printf
-
 	# epilogue
 	movl	%ebp, %esp
 	popl	%ebp
@@ -632,14 +532,8 @@ in_for:
 	# A[i] = %eax
 	movl	arg1(%ebp), %ebx	
 	movl	loc1(%ebp), %ecx
-	movl	%eax, (%ebx, %ecx, 4)
+	movl	%edx, (%ebx, %ecx, 4)	# remainder put in 
 
-	# debug
-	movl	$msg1, p1(%esp)
-	movl	%ecx, p2(%esp)
-	movl	%eax, p3(%esp)
-	call 	printf
-	
 	addl	$1, loc1(%ebp)
 
 in_for_cond:
