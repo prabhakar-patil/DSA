@@ -78,6 +78,28 @@ int main(void)
 	assert(res == BST_SUCCESS);
 	printf("PREDECESSOR(175)=%d\n", d);
 	
+	printf("INORDER-NRC:  ");
+	inorder_nrc(bst);
+	printf("PREORDER-NRC: ");
+	preorder_nrc(bst);
+	printf("POSTORDER-NRC: Implementation In Progress\n");
+	//postorder_nrc(bst);
+	
+	//printf("DELETE(75)\n");
+	//res = delete_bst(bst, 75);
+	//printf("DELETE(125)\n");
+	//res = delete_bst(bst, 125);
+	//printf("DELETE(50)\n");
+	//res = delete_bst(bst, 50);
+	printf("DELETE(100)\n");
+	res = delete_bst(bst, 100);
+	assert(res == BST_SUCCESS);
+	printf("IN-ORDER  : ");
+	inorder(bst);
+	printf("PRE-ORDER : ");
+	preorder(bst);
+	printf("POST-ORDER: ");
+	postorder(bst);
 
 	assert(destroy_bst(&bst) == BST_SUCCESS && bst == NULL);
 

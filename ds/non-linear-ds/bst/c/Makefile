@@ -4,9 +4,10 @@ CFLAGS=-Wall
 LFLAGS=
 
 SRCS=client.c bst.c
+HDRS=bst.h
 EXE=app
 
-$(EXE): $(SRCS)
+$(EXE): $(SRCS) $(HDRS)
 	$(CC) -o $(EXE) $(CFLAGS) $(SRCS)
 
 clean:

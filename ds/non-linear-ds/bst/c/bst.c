@@ -71,6 +71,52 @@ res_t insert_bst(bst_t *p_tree, data_t n_data)
 	}
 }
 
+res_t delete_bst(bst_t *p_tree, data_t d_data)
+{
+	bst_node_t *root = p_tree->root_node;
+	bst_node_t *pd = NULL;	//node to delete
+	bst_node_t *pr = NULL;	//node to be replaced
+	
+	if(root == NULL)
+		return (BST_EMPTY);
+
+	pd = search_bst_node(p_tree, d_data);
+	if(pd == NULL)
+		return (BST_DATA_NOT_FOUND);
+
+	if(pd->left == NULL)
+	{
+		//bring pd->right node at pd's location and delete pd
+		transplant(p_tree, pd, pd->right);
+	}
+	else if(pd->right == NULL)
+	{
+		//bring pd->left node at pd's location and delete pd 
+		transplant(p_tree, pd, pd->left);
+	}
+	else // both are present, better to find successor and replace
+	{
+		pr = _minimum(pd->right);
+
+		if(pd != pr->parent) //take care for pr->right subtree which is greater than pr
+		{
+			transplant(p_tree, pr, pr->right);	
+			pr->right = pd->right;
+			pr->right->parent = pr;
+		}
+
+		//take care of pr->left sub tree
+		transplant(p_tree, pd, pr);
+		pr->left = pd->left;
+		pr->left->parent = pr;
+	}
+
+	free(pd);
+	pd = NULL;
+
+	return (BST_SUCCESS);
+}
+
 bool  search_bst(bst_t *p_tree, data_t s_data)
 {
 	return (search_bst_node(p_tree, s_data) != NULL);	//cpp style boolean evaluation
@@ -168,6 +214,121 @@ res_t predecessor(bst_t *p_tree, data_t whose_predecessor, data_t *p_predecessor
 
 	*p_predecessor = p_predeccessor_node->data;
 	return (BST_SUCCESS);
+}
+
+void inorder_nrc(bst_t *p_tree)
+{
+	bst_node_t *run = p_tree->root_node;
+	stack_t *st = create_stack();
+	res_t res = STACK_SUCCESS;
+	assert(run);
+
+	printf("[beg]<->");
+	while(TRUE)
+	{
+		//pushing while traversing towards most left
+		while(run != NULL)
+		{
+			push(st, run);
+			run = run->left;
+		}
+
+		//found non-decreasing order number, so print. If empty tree is finished
+		res = pop(st, &run);
+		assert(res == STACK_SUCCESS || res == STACK_EMPTY);
+
+		if(res == STACK_EMPTY)
+			break;
+		printf("[%d]<->", run->data);
+
+		//travers RST
+		run = run->right;
+	}
+	
+
+	printf("[end]\n");
+}
+
+void preorder_nrc(bst_t *p_tree)
+{
+	bst_node_t *run = p_tree->root_node;
+	stack_t *st = create_stack();
+	res_t res = STACK_SUCCESS;
+	assert(run);
+
+	printf("[beg]<->");
+
+	while(TRUE)
+	{
+		//walk through LST,  keep printing and pushing
+		while(run != NULL)
+		{
+			printf("[%d]<->", run->data);
+			push(st, run);
+			run = run->left;
+		}
+
+		//check if each and every node is processed
+		//if yes, break the loop
+		res = pop(st, &run);
+		assert(res == STACK_SUCCESS || res == STACK_EMPTY);
+		if(res == BST_EMPTY)
+			break;
+
+		//if no, walk through RST
+		run = run->right;
+	}
+
+	printf("[end]\n");
+}
+
+void postorder_nrc(bst_t *p_tree)
+{
+	bst_node_t *run = p_tree->root_node;
+	stack_t *st = create_stack();
+	res_t res = STACK_SUCCESS;
+	bool ldone = FALSE;
+	bool rdone = FALSE;
+
+	assert(run);
+
+	printf("[beg]<->");
+	while(TRUE)
+	{
+		//walk through LST. Keep pushing
+		while(run != NULL)
+		{
+			push(st, run);
+			run =  run->left;
+		}
+		ldone = TRUE;
+		//if(ldone == TRUE && rdone == FALSE)
+		//	rdone = TRUE;
+		//if(ldone == FALSE && rdone == FALSE)
+		//	ldone = TRUE;
+
+		//check for LST and RST processing done or not
+		if(ldone == TRUE && rdone == TRUE)
+		{
+			res = pop(st, &run);
+			printf("[%d]<->", run->data);
+			ldone = FALSE;
+			rdone = FALSE;
+		}
+
+		res = top(st, &run);
+
+		assert(res == STACK_SUCCESS || res == STACK_EMPTY);
+		
+		//check in each and every node is processed
+		if(res == STACK_EMPTY)
+			break;
+		
+		//walk through RST
+		run = run->right;
+		rdone = TRUE;
+	}
+	printf("[end]\n");
 }
 
 /*Auxillary Routines*/
@@ -307,6 +468,21 @@ bst_node_t *_predecessor(bst_node_t *node)
 		
 }
 
+void transplant(bst_t *p_tree, bst_node_t *pd, bst_node_t *pr)
+{
+	//handle pd->parent left/right
+	if(pd->parent == NULL)	//take care for root node 
+		p_tree->root_node = pr;
+	else if(pd == pd->parent->left)		//if pd is pd's parent left, then make pr also pd's parent left
+		pd->parent->left = pr;
+	else if(pd == pd->parent->right)	//similar treament just like left
+		pd->parent->right = pr;
+
+	//set pr->parent
+	if(pr != NULL)
+		pr->parent = pd->parent;
+}
+
 void *x_calloc(int nr_elements, int size_per_element)
 {
 	void *tmp = calloc(nr_elements, size_per_element);
@@ -314,3 +490,113 @@ void *x_calloc(int nr_elements, int size_per_element)
 	return (tmp);
 }
 
+
+
+/****** Stack using dcll ***********/
+stack_t *create_stack(void)
+{
+	stack_t *st = (stack_t*)get_dcll_node(NULL);
+	st->next = st;
+	st->prev = st;
+	return (st);
+}
+
+res_t destroy_stack(stack_t **pp_st)
+{
+	stack_t *st = NULL;
+	dcll_node_t *run, *run_next;
+
+	assert(pp_st);
+
+	st = *pp_st;
+	run = st->next;
+	while(run != st)
+	{
+		run_next = run->next;
+		free(run);
+		run = run_next;
+	}
+
+	free(st);
+	*pp_st = NULL;
+
+	return (STACK_SUCCESS);
+}
+
+res_t push(stack_t *st, bst_node_t *p)
+{
+	dcll_node_t *head = st;
+	dcll_node_t *new_node = NULL; 
+	assert(st);
+
+	new_node = get_dcll_node(p);
+
+	//push at dcll start
+	g_insert(head, new_node, head->next);
+
+	return (STACK_SUCCESS);
+}
+
+res_t pop(stack_t *st, bst_node_t **pp)
+{
+	bst_node_t *top_bst_node = NULL;
+	dcll_node_t *head = st;
+
+	assert(pp);
+
+	if(is_empty(st))
+		return (STACK_EMPTY);
+
+	top_bst_node = head->next->p_bst_node;
+	assert(top_bst_node);
+	*pp = top_bst_node;
+
+	g_delete(head->next);
+
+	return (STACK_SUCCESS);
+}
+
+res_t top(stack_t *st, bst_node_t **pp)
+{
+	bst_node_t *top_bst_node = NULL;
+	dcll_node_t *head = st;
+
+	assert(pp);
+
+	if(is_empty(st))
+		return (STACK_EMPTY);
+
+	top_bst_node = head->next->p_bst_node;
+	*pp = top_bst_node;
+
+	return (STACK_SUCCESS);
+}
+
+bool is_empty(stack_t *st)
+{
+	return (st->next == st && st->prev == st);
+}
+
+dcll_node_t *get_dcll_node(bst_node_t *p)
+{
+	dcll_node_t *node = (dcll_node_t*)x_calloc(1, sizeof(dcll_node_t));
+	node->p_bst_node = p;
+	return (node);
+}
+
+void g_insert(dcll_node_t *beg, dcll_node_t *mid, dcll_node_t *end)
+{
+	beg->next = mid;
+	end->prev = mid;
+	mid->next = end;
+	mid->prev = beg;
+}
+
+void g_delete(dcll_node_t *d_node)
+{
+	assert(d_node);
+
+	d_node->prev->next = d_node->next;
+	d_node->next->prev = d_node->prev;
+	free(d_node);
+}
