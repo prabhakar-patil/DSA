@@ -11,3 +11,5 @@
     - front
     - rear
     - queue_empty
+
+3. hash queue

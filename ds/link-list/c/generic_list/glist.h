@@ -13,16 +13,15 @@
 #define CONTAINER_OF(addx, T, x)	(T*)((char*)addx - OFFSET_OF(T, x))
 
 struct list_head;		//forward declaration
-struct ItegerNode;		//forward declaration
+//struct ItegerNode;		//forward declaration
 
 typedef struct list_head   	list_t;
 typedef struct list_head   	head_t;
-typedef struct IntegerNode 	node_t;
-typedef int         		data_t;
+//typedef struct IntegerNode 	node_t;
+//typedef int         		data_t;
 typedef int         		res_t;
 typedef int         		len_t;
 typedef int         		bool_t;
-
 
 struct list_head 
 {
@@ -30,12 +29,12 @@ struct list_head
     struct list_head *next;
 };
 
-
-struct IntegerNode 
+/*struct IntegerNode 
 {
     data_t data;
     struct list_head m_list;    //master list
 };
+*/
 
 head_t  *create_list        (void);
 res_t   destroy_list        (head_t **pphead);

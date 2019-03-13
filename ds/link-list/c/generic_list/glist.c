@@ -245,8 +245,6 @@ void display(head_t *head)
     node_t *current;
     assert(head);
 
-    //return;
-
     run = head->next;
     fprintf(stdout, "[beg]<->");
     while(run != head)
