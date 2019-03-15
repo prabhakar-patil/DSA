@@ -65,7 +65,7 @@ struct edge
 
 struct edge_node
 {
-	struct edge e;
+	struct edge e;	//data part
 	struct edge_node *prev;
 	struct edge_node *next;
 };
@@ -89,9 +89,28 @@ void print_graph();
 
 /*Auxillury Functions*/
 //vnode
+vlist_t *v_create_list();
+res_t	v_destroy_list(vlist_t **pp);
 vnode_t *v_get_node(vertex_t v);
-vnode_t *v_search_node(vnode_t *head, vnode_t *s_vnode);
+vnode_t *v_search_node(vnode_t *head, vertex_t s_v);
 void    v_delete_node(vnode_t *d_vnode);
+void 	v_insert_node(vnode_t *beg, vnode_t *mid, vnode_t *end);
+
+//hnode 
+hlist_t *h_create_list();
+res_t   h_destroy_list(hlist_t **pp);
+hnode_t *h_get_node(vertex_t v);
+hnode_t *h_search_node(hnode_t *head, vertex_t s_v);
+void	h_delete_node(hnode_t *d_hnode);
+void    h_insert_node(hnode_t *beg, hnode_t *mid, hnode_t *end);
+
+//edge_node
+edge_list_t *en_create_list();
+res_t	    en_destroy_list(edge_list_t **pp);
+edge_node_t *en_get_node(vertex_t v_start, vertex_t v_end, double w);
+edge_node_t *en_search_node(edge_node_t *head, vertex_t v_start, vertex_t v_end);
+void	    en_delete_node(edge_node_t *d_node);
+void	    en_insert_node(edge_node_t *beg, edge_node_t *mid, edge_node_t *end);
 
 void *x_calloc(int nr_elements, int size_per_element);
 
