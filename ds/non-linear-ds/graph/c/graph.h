@@ -1,6 +1,9 @@
 #ifndef _GRAPH_H_
 #define _GRAPH_H_
 
+#define TRUE	1
+#define FALSE	0
+
 //forward declarations
 struct vnode;
 struct hnode;
@@ -34,6 +37,7 @@ enum result
 	ERROR=-1,
 	SUCCESS,
 	DATA_NOT_FOUND,
+	DATA_EXISTS,
 	EMPTY
 };
 
@@ -82,10 +86,12 @@ struct graph
 graph_t *create_graph();
 res_t destroy_graph(graph_t **pp);
 res_t add_vertex(graph_t *g, vertex_t v);
-res_t remove_vertext(graph_t *g, vertex_t v);
+res_t remove_vertex(graph_t *g, vertex_t v);
 res_t add_edge(graph_t *g, vertex_t vstart, vertex_t vend);
 res_t remove_edge(graph_t *g, vertex_t vstart, vertex_t vend);
-void print_graph();
+res_t degree(graph_t *g, vertex_t v, int *p_degree);
+void print_graph(graph_t *g);
+void print_edges(graph_t *g);
 
 /*Auxillury Functions*/
 //vnode
@@ -95,6 +101,7 @@ vnode_t *v_get_node(vertex_t v);
 vnode_t *v_search_node(vnode_t *head, vertex_t s_v);
 void    v_delete_node(vnode_t *d_vnode);
 void 	v_insert_node(vnode_t *beg, vnode_t *mid, vnode_t *end);
+void    v_insert_end(vnode_t *head, vnode_t *n_node);
 
 //hnode 
 hlist_t *h_create_list();
@@ -103,6 +110,7 @@ hnode_t *h_get_node(vertex_t v);
 hnode_t *h_search_node(hnode_t *head, vertex_t s_v);
 void	h_delete_node(hnode_t *d_hnode);
 void    h_insert_node(hnode_t *beg, hnode_t *mid, hnode_t *end);
+void    h_insert_end(hnode_t *head, hnode_t *new_node);
 
 //edge_node
 edge_list_t *en_create_list();
@@ -111,6 +119,7 @@ edge_node_t *en_get_node(vertex_t v_start, vertex_t v_end, double w);
 edge_node_t *en_search_node(edge_node_t *head, vertex_t v_start, vertex_t v_end);
 void	    en_delete_node(edge_node_t *d_node);
 void	    en_insert_node(edge_node_t *beg, edge_node_t *mid, edge_node_t *end);
+void	    en_insert_end(edge_node_t *head, edge_node_t *new_node);
 
 void *x_calloc(int nr_elements, int size_per_element);
 
