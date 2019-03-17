@@ -44,9 +44,9 @@ enum result
 struct vnode
 {
 	vertex_t v;
-	color_t col;
+	color_t color;
 	hlist_t *ph_list;
-	struct vnode *pred;	//??
+	struct vnode *pred;	//predecessor
 	struct vnode *prev;
 	struct vnode *next;
 };
