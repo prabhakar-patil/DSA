@@ -1,3 +1,10 @@
+/*
+ * Date: 17-Mar-2019
+ * Prabhakar Patil
+ * CPA-601
+ * Guru-Yogeshwar Shukl
+ * */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -112,7 +119,7 @@ res_t remove_vertex(graph_t *g, vertex_t v)
 	return (SUCCESS);
 }
 
-res_t add_edge(graph_t *g, vertex_t v_start, vertex_t v_end)
+res_t add_edge(graph_t *g, vertex_t v_start, vertex_t v_end, double w)
 {
 	vnode_t *p_vstart = NULL;
 	vnode_t *p_vend = NULL;
@@ -153,7 +160,7 @@ res_t add_edge(graph_t *g, vertex_t v_start, vertex_t v_end)
 	}
 
 	//03. update edge_list data structure
-	p_edge_node = en_get_node(v_start, v_end, 0.0);
+	p_edge_node = en_get_node(v_start, v_end, w);
 	en_insert_end(g->pe_list, p_edge_node);
 	g->nr_edges +=1;
 
@@ -267,7 +274,7 @@ void print_edges(graph_t *g)
 	run = head->next;
 	while(run != head)
 	{
-		printf("[%d-%d]<->", run->e.start, run->e.end);
+		printf("[%d-%d](%lf)<->", run->e.start, run->e.end, run->e.w);
 		run = run->next;
 	}
 	printf("[end]\n");
@@ -373,7 +380,7 @@ hlist_t *h_create_list()
 	hnode_t *head = h_get_node(0);	//we are going to maintain degree in horizontal list head node data
 	head->next = head;
 	head->prev = head;
-	//head->w = ??
+	//head->d = ??
 	
 	return (head);
 }

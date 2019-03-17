@@ -1,5 +1,14 @@
+/*
+ * Date: 17-Mar-2019
+ * Prabhakar Patil
+ * CPA-601
+ * Guru-Yogeshwar Shukl
+ * */
+
 #ifndef _GRAPH_H_
 #define _GRAPH_H_
+
+#include <math.h> //INFINITE
 
 #define TRUE	1
 #define FALSE	0
@@ -16,6 +25,7 @@ enum   result;
 typedef enum result	res_t;
 typedef int 		bool;
 typedef int 		vertex_t;
+typedef int		len_t;
 typedef enum color	color_t;
 typedef struct graph	graph_t;
 typedef struct vnode 	vnode_t;
@@ -45,6 +55,7 @@ struct vnode
 {
 	vertex_t v;
 	color_t color;
+	double d;		//shortest path cost from single source
 	hlist_t *ph_list;
 	struct vnode *pred;	//predecessor
 	struct vnode *prev;
@@ -54,8 +65,8 @@ struct vnode
 struct hnode 
 {
 	vertex_t v;
-	double w;		//??
-	struct vnode *pv;	//
+	double d;		//shortest path cost from single source
+	struct vnode *pv;	//??
 	struct hnode *prev;
 	struct hnode *next;
 };
@@ -64,7 +75,7 @@ struct edge
 {
 	vertex_t start;
 	vertex_t end;
-	double w;
+	double w;	//weight of an edge
 };
 
 struct edge_node
@@ -87,7 +98,7 @@ graph_t *create_graph();
 res_t destroy_graph(graph_t **pp);
 res_t add_vertex(graph_t *g, vertex_t v);
 res_t remove_vertex(graph_t *g, vertex_t v);
-res_t add_edge(graph_t *g, vertex_t vstart, vertex_t vend);
+res_t add_edge(graph_t *g, vertex_t vstart, vertex_t vend, double w);
 res_t remove_edge(graph_t *g, vertex_t vstart, vertex_t vend);
 res_t degree(graph_t *g, vertex_t v, int *p_degree);
 void print_graph(graph_t *g);

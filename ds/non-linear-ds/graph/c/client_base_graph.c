@@ -1,3 +1,10 @@
+/*
+ * Date: 17-Mar-2019
+ * Prabhakar Patil
+ * CPA-601
+ * Guru-Yogeshwar Shukl
+ * */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -37,7 +44,7 @@ int main(void)
 	for(i=0; i<sizeof(edges)/sizeof(edges[0]); i++)
 	{
 		printf("\nAdding edge:[%d-%d]\n", edges[i].start, edges[i].end);
-		assert(add_edge(g, edges[i].start, edges[i].end) == SUCCESS);
+		assert(add_edge(g, edges[i].start, edges[i].end, edges[i].w) == SUCCESS);
 		printf("GRAPH(G,V):\n");
 		print_graph(g);
 		printf("EDGES: ");
