@@ -25,12 +25,25 @@ int main(void)
 	g = create_graph();
 	for(i=0; i<sizeof(vertices)/sizeof(vertices[0]); i++)
 	{
-		add_vertex(g, vertices[i]);
+		v = vertices[i];
+		printf("\nAdding vertext: %d\n", v);
+		assert(add_vertex(g, v) == SUCCESS);
+		printf("GRAPH(G,V):\n");
+		print_graph(g);
+		printf("EDGES: ");
+		print_edges(g);
 	}
 
 	for(i=0; i<sizeof(edges)/sizeof(edges[0]); i++)
 	{
+		printf("\nAdding edge:[%d-%d]\n", edges[i].start, edges[i].end);
 		assert(add_edge(g, edges[i].start, edges[i].end) == SUCCESS);
+		printf("GRAPH(G,V):\n");
+		print_graph(g);
+		printf("EDGES: ");
+		print_edges(g);
+
+
 	}
 
 	assert(add_vertex(g, 8) == SUCCESS);
@@ -40,26 +53,10 @@ int main(void)
 	printf("EDGES: ");
 	print_edges(g);
 
-	/*v = 6;
-	printf("Removing vertext: %d\n", v);
-	assert(remove_vertex(g, v) == SUCCESS);
-	printf("GRAPH(G,V):\n");
-	print_graph(g);
-	printf("EDGES: ");
-	print_edges(g);
-
-	printf("Removing EDGE(2,5)\n");
-	assert(remove_edge(g, 2, 5) == SUCCESS);
-	printf("GRAPH(G,V):\n");
-	print_graph(g);
-	printf("EDGES: ");
-	print_edges(g);
-*/
-
-	for(i=0; i<sizeof(vertices)/sizeof(vertices[0]); i++)
+	for(i=sizeof(vertices)/sizeof(vertices[0])-1; i>=0; i--)
 	{
 		v = vertices[i];
-		printf("Removing vertext: %d\n", v);
+		printf("\nRemoving vertext: %d\n", v);
 		assert(remove_vertex(g, v) == SUCCESS);
 		printf("GRAPH(G,V):\n");
 		print_graph(g);
