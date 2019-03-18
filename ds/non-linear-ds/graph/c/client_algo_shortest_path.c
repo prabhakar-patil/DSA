@@ -19,7 +19,6 @@ int main(void)
 {
 	int i;
 	res_t rs;
-	//vertex_t v;
 	graph_t *g=NULL;
 	const vertex_t vertices_state1[] = {0, 1, 2, 3};
 
@@ -36,6 +35,22 @@ int main(void)
 				   {0,3,3.0},
 				   {1,2,2.0},
 				   {3,2,3.0},};	
+
+	const vertex_t vertices_state3[] = {0, 1, 2, 3, 4};
+
+	const edge_t edges_state3[] = {  
+	       			   {0,1,10.0},
+				   {0,4,5.0},
+				   {1,2,1.0},
+				   {3,2,6.0},
+				   {3,0,7.0},
+
+				   {4,1,3.0},
+				   {4,2,9.0},
+				   {4,3,2.0}
+			          };
+
+
 
 	/*******************GRAPH(G,V):STATE1*********************/
 	g = create_graph();
@@ -55,7 +70,7 @@ int main(void)
 	print_edges(g);
 
 	test_dijkstra(g);
-	//test_bellman_ford(g);
+	test_bellman_ford(g);
 
 	rs = destroy_graph(&g);
 	assert(rs == SUCCESS && g == NULL);	
@@ -82,7 +97,33 @@ int main(void)
 	print_edges(g);
 
 	test_dijkstra(g);
-	//test_bellman_ford(g);
+	test_bellman_ford(g);
+
+	rs = destroy_graph(&g);
+	assert(rs == SUCCESS && g == NULL);	
+
+
+
+	/*******************GRAPH(G,V):STATE3*********************/
+	g = create_graph();
+	for(i=0; i<sizeof(vertices_state3)/sizeof(vertices_state3[0]); i++)
+	{
+		assert(add_vertex(g, vertices_state3[i]) == SUCCESS);
+	}
+
+	for(i=0; i<sizeof(edges_state3)/sizeof(edges_state3[0]); i++)
+	{
+		assert(add_edge(g, edges_state3[i].start, edges_state3[i].end, edges_state3[i].w) == SUCCESS);
+	}
+
+	printf("\n*******************GRAPH(G,V):STATE3*********************\n");
+	printf("GRAPH(G,V):\n");
+	print_graph(g);
+	printf("EDGES: ");
+	print_edges(g);
+
+	test_dijkstra(g);
+	test_bellman_ford(g);
 
 	rs = destroy_graph(&g);
 	assert(rs == SUCCESS && g == NULL);	
@@ -111,9 +152,27 @@ void test_dijkstra(graph_t *g)
 
 		printf("[%d]:(d:%lf)(pred:%d)\n", pv_run->v, pv_run->d, pred_v);
 	}
-
 }
 
 void test_bellman_ford(graph_t *g)
 {
+	vnode_t *pv_head = NULL;
+	vnode_t *pv_run = NULL;
+	res_t rs;
+	vertex_t pred_v;
+
+	printf("\nBELLMAN-FORD(g, 0)\n");
+	rs = bellman_ford(g,0);
+	assert(rs == SUCCESS);
+
+	pv_head = g->pv_list;
+	for(pv_run = pv_head->next; pv_run != pv_head; pv_run = pv_run->next)
+	{
+		if(pv_run->pred != NULL)
+			pred_v = pv_run->pred->v; 
+		else //no predecessor, must be source node
+			pred_v = -1;
+
+		printf("[%d]:(d:%lf)(pred:%d)\n", pv_run->v, pv_run->d, pred_v);
+	}
 }

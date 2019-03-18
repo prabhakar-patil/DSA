@@ -15,6 +15,7 @@ res_t depth_first_search(graph_t *g);	//DFS
 res_t breadth_first_search(graph_t *g, vertex_t s);	//BFS
 
 res_t dijkstra(graph_t *g, vertex_t s);
+res_t bellman_ford(graph_t *g, vertex_t s);
 
 /*Auxiliary Routines*/
 void reset(graph_t *g);
@@ -52,9 +53,5 @@ void	    dcll_insert_before(dcll_node_t *before_node, dcll_node_t *new_node); //
 void 	    dcll_insert_end(dcll_node_t *head, dcll_node_t *new_node);
 void	    dcll_insert_node(dcll_node_t *beg, dcll_node_t *mid, dcll_node_t *end);
 void	    dcll_delete_node(dcll_node_t *d_node);
-//len_t	    dcll_length(dcll_node_t *head);
-//double	    *dcll_to_array(dcll_node_t *head, len_t *p_len); //caller of this funtion shall take care to free returned 'double *' after use
-//dcll_list_t *dcll_to_list(double *p_array, len_t len);
-//void	    sort(double *p_array, size_t array_size);	//internally insertion sort implemented
 
 #endif /*_GRAPH_ALGO_H_*/

@@ -109,10 +109,13 @@ res_t dijkstra(graph_t *g, vertex_t s)
 	//priority is maintained such that cost will in non-decreasing order
 	prio_q = create_queue();
 	pv_head = g->pv_list;
+	printf("prio_q:[beg]<->");
 	for(pv_run = pv_head->next; pv_run != pv_head; pv_run = pv_run->next)
 	{
 		enqueue_prio(prio_q, pv_run);	
+		printf("[%lf(%d)]<->", pv_run->d, pv_run->v);
 	}
+	printf("[end]\n");
 
 	//02. traverse until Q does not become empty
 	while(is_queue_empty(prio_q) == FALSE)
@@ -137,6 +140,34 @@ res_t dijkstra(graph_t *g, vertex_t s)
 
 	rs = destroy_queue(&prio_q);
 	assert(rs == SUCCESS && prio_q == NULL);
+
+	return (SUCCESS);
+}
+
+res_t bellman_ford(graph_t *g, vertex_t s)
+{
+	int i;
+	edge_node_t *pe_head = NULL;
+	edge_node_t *pe_run = NULL;
+	vnode_t *u=NULL;
+	vnode_t *v=NULL;
+	double w;
+
+	//01. initialize single source
+	initialize_single_source(g, s);
+
+	//02. 
+	for(i=0; i<(g->nr_vertices-1); i++)
+	{
+		pe_head = g->pe_list;
+		for(pe_run = pe_head->next; pe_run != pe_head; pe_run = pe_run->next)
+		{
+			u = v_search_node(g->pv_list, pe_run->e.start);
+			v = v_search_node(g->pv_list, pe_run->e.end);
+			w = pe_run->e.w;
+			relax(u,v,w);
+		}
+	}
 
 	return (SUCCESS);
 }
@@ -289,24 +320,6 @@ res_t dequeue(queue_t *q, vnode_t **ppv_node)
 	return (SUCCESS);
 }
 
-/*res_t sort_queue(queue_t *q, queue_t **pp_sorted_queue)
-{
-	len_t q_len = 0;
-	dcll_node_t *head = NULL;
-	dcll_list_t *sorted_list = NULL;
-	double *p_array = NULL;
-	assert(q);
-	
-	p_array = dcll_to_array(head, &q_len);
-	sort(p_array, q_len);
-	sorted_list = dcll_to_list(p_array, q_len);
-
-	assert(pp_sorted_queue);
-	*pp_sorted_queue = sorted_list;
-
-	return (SUCCESS);
-}*/
-
 bool is_queue_empty(queue_t *q)
 {
 	queue_node_t *q_head = NULL;
@@ -364,79 +377,3 @@ void dcll_delete_node(dcll_node_t *d_node)
 	free(d_node);
 }
 
-/*len_t dcll_length(dcll_node_t *head)
-{
-	len_t count = 0;
-	dcll_node_t *run = NULL;
-	assert(head);
-
-	run = head->next;
-	while(run != head)
-	{
-		count = count + 1;
-		run = run->next;
-	}
-
-	return (count);
-}*/
-
-/*double *dcll_to_array(dcll_node_t *head, len_t *p_len)
-{//caller of this funtion shall take care to free 'p_array' after use
-	dcll_node_t *run = NULL;
-	double *p_array = NULL;
-	len_t len;
-	int i;
-	assert(head);
-	assert(p_len);
-
-	len = dcll_length(head);
-	*p_len = len;
-	p_array = (double*)x_calloc(len, sizeof(double));
-
-	i = 0;
-	run = head->next;
-	while(run != head && i<len)
-	{
-		p_array[i] = run->pv_node->d;	
-		run = run->next;
-		i = i+1;
-	}
-
-	assert(i == len);
-
-	return (p_array);
-}*/
-
-/*dcll_list_t *dcll_to_list(double *p_array, len_t len)
-{//caller of this funtion shall take care to free 'list' after use
-	dcll_list_t *lst = NULL;
-	int i;
-	assert(p_array);	
-
-	lst = dcll_create_list();
-
-	for(i=0; i<len; i++)
-	{
-		//dcll_insert_end(lst, dcll_get_node())
-	}
-	
-	return (lst);
-}*/
-
-/*void sort(double *p_array, size_t array_size)
-{//insertion sort
-	int i, j;
-	double key;
-	
-	for(j=1; j<array_size; j++)
-	{
-		i = j-1;
-		key = p_array[j];
-		while(i>-1 && key < p_array[i])
-		{
-			p_array[i+1] = p_array[i];
-			i = i-1;
-		}
-		p_array[i+1] = key;
-	}
-}*/
