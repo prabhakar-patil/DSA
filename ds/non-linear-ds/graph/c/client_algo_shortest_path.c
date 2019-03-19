@@ -41,9 +41,10 @@ int main(void)
 	const edge_t edges_state3[] = {  
 	       			   {0,1,10.0},
 				   {0,4,5.0},
+
 				   {1,2,1.0},
+
 				   {3,2,6.0},
-				   {3,0,7.0},
 
 				   {4,1,3.0},
 				   {4,2,9.0},
@@ -69,7 +70,7 @@ int main(void)
 	printf("EDGES: ");
 	print_edges(g);
 
-	//test_dijkstra(g);
+	test_dijkstra(g);
 	test_bellman_ford(g);
 
 	rs = destroy_graph(&g);
@@ -96,7 +97,7 @@ int main(void)
 	printf("EDGES: ");
 	print_edges(g);
 
-	//test_dijkstra(g);
+	test_dijkstra(g);
 	test_bellman_ford(g);
 
 	rs = destroy_graph(&g);
@@ -122,7 +123,7 @@ int main(void)
 	printf("EDGES: ");
 	print_edges(g);
 
-	//test_dijkstra(g);
+	test_dijkstra(g);
 	test_bellman_ford(g);
 
 	rs = destroy_graph(&g);
@@ -135,12 +136,12 @@ void test_dijkstra(graph_t *g)
 {
 	vnode_t *pv_head = NULL;
 	vnode_t *pv_run = NULL;
-	//res_t rs;
+	res_t rs;
 	vertex_t pred_v;
 
 	printf("\nDIJKSTRA(g, 0):\n");
-	//rs = dijkstra(g, 0);
-	//assert(rs == SUCCESS);
+	rs = dijkstra(g, 0);
+	assert(rs == SUCCESS);
 	
 	pv_head = g->pv_list;
 	for(pv_run = pv_head->next; pv_run != pv_head; pv_run = pv_run->next)

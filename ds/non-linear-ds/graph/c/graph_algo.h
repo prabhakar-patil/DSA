@@ -56,5 +56,6 @@ void	    dcll_insert_node(dcll_node_t *beg, dcll_node_t *mid, dcll_node_t *end);
 void	    dcll_delete_node(dcll_node_t *d_node);
 vnode_t	    *dcll_extract_min(dcll_node_t *head);
 bool	    dcll_is_empty(dcll_list_t *lst);
+void	    dcll_print(dcll_node_t *head);
 
 #endif /*_GRAPH_ALGO_H_*/
