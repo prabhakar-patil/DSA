@@ -48,10 +48,13 @@ bool 	is_queue_empty(queue_t *q);
 res_t	sort_queue(queue_t *q, queue_t **pp_sorted_queue);
 
 dcll_list_t *dcll_create_list();
+void 	    dcll_destroy_list(dcll_list_t **pp);
 dcll_node_t *dcll_get_node(vnode_t *pv);
 void	    dcll_insert_before(dcll_node_t *before_node, dcll_node_t *new_node); // [before->prev] <-> [new node] <-> [before node]
 void 	    dcll_insert_end(dcll_node_t *head, dcll_node_t *new_node);
 void	    dcll_insert_node(dcll_node_t *beg, dcll_node_t *mid, dcll_node_t *end);
 void	    dcll_delete_node(dcll_node_t *d_node);
+vnode_t	    *dcll_extract_min(dcll_node_t *head);
+bool	    dcll_is_empty(dcll_list_t *lst);
 
 #endif /*_GRAPH_ALGO_H_*/

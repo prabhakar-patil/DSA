@@ -41,3 +41,5 @@ Defination of Graph:
            \  /
 	    v3
 
+  State3:
+	Cormen 24.6 Figure

@@ -83,7 +83,64 @@ res_t breadth_first_search(graph_t *g, vertex_t s)
 }
 
 //shortest path algo interface routines
-res_t dijkstra(graph_t *g, vertex_t s)
+/*res_t dijkstra(graph_t *g, vertex_t s)
+{
+	dcll_list_t *lstQ = NULL;
+	vnode_t *pv_head = NULL;
+	vnode_t *pv_run = NULL;
+	vnode_t *pv_source = NULL;
+	vnode_t *u = NULL;
+	vnode_t *v = NULL;
+	hnode_t *ph_head = NULL;
+	hnode_t *ph_run = NULL;
+	edge_node_t *pe_node = NULL;
+	double w;
+	assert(g);
+
+	pv_source = v_search_node(g->pv_list, s);
+	if(pv_source == NULL)
+		return (DATA_NOT_FOUND);	//source vertex not found
+
+	//00. initialize graph for source vertex
+	initialize_single_source(g, s);	
+
+	//01. create and fill queueu by G.V based on cost(i.e. d) so that queue will become priority
+	//priority is maintained such that cost will in non-decreasing order
+	lstQ = dcll_create_list();
+	pv_head = g->pv_list;
+	printf("Q:[beg]<->");
+	for(pv_run = pv_head->next; pv_run != pv_head; pv_run = pv_run->next)
+	{
+		dcll_insert_end(lstQ, dcll_get_node(pv_run));	
+		printf("[%lf(%d)]<->", pv_run->d, pv_run->v);
+	}
+	printf("[end]\n");
+	
+
+	//02. traverse until Q does not become empty
+	while(dcll_is_empty(lstQ) == FALSE)
+	{
+		u = dcll_extract_min(lstQ);
+
+		//walk through adjacency list for relaxing edges
+		ph_head = u->ph_list;
+		for(ph_run = ph_head->next; ph_run != ph_head; ph_run = ph_run->next)
+		{
+			v = v_search_node(g->pv_list, ph_run->v);
+		       	assert(v);
+
+			pe_node = en_search_node(g->pe_list, u->v, v->v);
+		        assert(pe_node);
+
+			w = pe_node->e.w;	
+			relax(u, v, w);
+		}
+	}
+
+	return (SUCCESS);
+}*/
+
+/*res_t dijkstra(graph_t *g, vertex_t s)
 {
 	queue_t *prio_q = NULL;
 	vnode_t *pv_head = NULL;
@@ -91,6 +148,7 @@ res_t dijkstra(graph_t *g, vertex_t s)
 	vnode_t *pv_source = NULL;
 	vnode_t *u = NULL;
 	vnode_t *v = NULL;
+	vnode_t *pv_min_d = NULL;
 	hnode_t *ph_head = NULL;
 	hnode_t *ph_run = NULL;
 	edge_node_t *pe_node = NULL;
@@ -109,13 +167,18 @@ res_t dijkstra(graph_t *g, vertex_t s)
 	//priority is maintained such that cost will in non-decreasing order
 	prio_q = create_queue();
 	pv_head = g->pv_list;
-	printf("prio_q:[beg]<->");
-	for(pv_run = pv_head->next; pv_run != pv_head; pv_run = pv_run->next)
-	{
-		enqueue_prio(prio_q, pv_run);	
-		printf("[%lf(%d)]<->", pv_run->d, pv_run->v);
-	}
-	printf("[end]\n");
+	//printf("prio_q:[beg]<->");
+	//for(pv_run = pv_head->next; pv_run != pv_head; pv_run = pv_run->next)
+	//{
+	//	enqueue_prio(prio_q, pv_run);	
+	//	printf("[%lf(%d)]<->", pv_run->d, pv_run->v);
+	//}
+	//printf("[end]\n");
+	
+	pv_run = v_search_node(pv_head, s);
+	assert(pv_run);
+	rs = enqueue_prio(prio_q, pv_run);	//source node inserted first since v.d=0
+	assert(rs == SUCCESS);
 
 	//02. traverse until Q does not become empty
 	while(is_queue_empty(prio_q) == FALSE)
@@ -135,14 +198,27 @@ res_t dijkstra(graph_t *g, vertex_t s)
 
 			w = pe_node->e.w;	
 			relax(u, v, w);
+			
+			//arrangment to find min_d vnode
+			if(pv_min_d)
+			{
+				if(pv_min_d->d > v->d)
+					pv_min_d = v;
+			}
+			else
+			{
+				pv_min_d = v;
+			}
 		}
+		//enqueue minimum d vnode to prio queue
+		enqueue_prio(prio_q, pv_min_d);
 	}
 
 	rs = destroy_queue(&prio_q);
 	assert(rs == SUCCESS && prio_q == NULL);
 
 	return (SUCCESS);
-}
+}*/
 
 res_t bellman_ford(graph_t *g, vertex_t s)
 {
@@ -340,6 +416,26 @@ dcll_list_t *dcll_create_list()
 	return (head);
 }
 
+void dcll_destroy_list(dcll_list_t **pp)
+{
+	dcll_node_t *p_head = NULL;
+        dcll_node_t *p_run = NULL;
+        dcll_node_t *p_run_next = NULL;
+        assert(pp);
+
+        p_head = *pp;
+        p_run = p_head->next;
+        while(p_run != p_head)
+        {
+                p_run_next = p_run->next;
+                free(p_run);
+                p_run = p_run_next;
+        }
+        free(p_head);
+        p_head = NULL;
+        *pp = NULL;
+}
+
 dcll_node_t *dcll_get_node(vnode_t *pv)
 {
 	dcll_node_t *new_node = (dcll_node_t*)x_calloc(1, sizeof(dcll_node_t));
@@ -377,3 +473,33 @@ void dcll_delete_node(dcll_node_t *d_node)
 	free(d_node);
 }
 
+bool dcll_is_empty(dcll_list_t *lst)
+{
+	assert(lst);
+	if(lst->next == lst && lst->prev == lst)
+		return (TRUE);
+
+	return (FALSE);
+}
+
+vnode_t *dcll_extract_min(dcll_node_t *head)
+{
+	dcll_node_t *run = NULL;
+	dcll_node_t *min_node = NULL;
+	vnode_t *pv_min = NULL;
+	assert(head);
+
+	run = head->next;
+	min_node = run;
+	while(run != head)
+	{
+		if(min_node->pv_node->d > run->pv_node->d)
+			min_node = run;
+
+		run = run->next;
+	}
+	printf("extract_min:v=%d, d=%lf\n", min_node->pv_node->v, min_node->pv_node->d);
+	pv_min = min_node->pv_node;
+	dcll_delete_node(min_node);
+	return (pv_min);
+}
