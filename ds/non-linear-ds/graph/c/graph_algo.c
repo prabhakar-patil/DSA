@@ -118,7 +118,7 @@ res_t dijkstra(graph_t *g, vertex_t s)
 	//02. traverse until Q does not become empty
 	while(dcll_is_empty(lstQ) == FALSE)
 	{
-		u = dcll_extract_min(lstQ);
+		u = dcll_extract_min_d(lstQ);
 
 		//walk through adjacency list for relaxing edges
 		ph_head = u->ph_list;
@@ -163,6 +163,66 @@ res_t bellman_ford(graph_t *g, vertex_t s)
 		}
 	}
 
+	return (SUCCESS);
+}
+
+//MST Algorithms
+res_t mst_prim(graph_t *g, vertex_t r)
+{
+	vnode_t *pv_head, *pv_run;
+	vnode_t *pv_mst_root = NULL;
+	vnode_t *u = NULL, *v = NULL;
+	hnode_t *ph_head, *ph_run;  //for adjacency list
+	edge_node_t *pe_node = NULL;
+	dcll_node_t *lstQ = NULL;
+	bool b_contains;
+	double w;
+	assert(g);
+
+	pv_mst_root = v_search_node(g->pv_list, r);
+	if(pv_mst_root == NULL)
+		return (DATA_NOT_FOUND);
+
+	//01. Create Priority Q, we are using list data structure to exctract minimum 'key' valued vnode
+	lstQ = dcll_create_list();
+
+	//02. initialize vnode's 'key' and 'pred' fields as well as update Q
+	pv_head = g->pv_list;
+	for(pv_run = pv_head->next; pv_run != pv_head; pv_run = pv_run->next)
+	{
+		pv_run->key = INFINITY;
+		pv_run->pred = NULL;
+
+		dcll_insert_end(lstQ, dcll_get_node(pv_run));
+	}
+	pv_mst_root->key = 0; //root key. First vertex to be processed from Q
+	//dcll_print(lstQ);
+
+	//03. Traverse through Q until it gets empty, and at the end you will get a MST
+	while(dcll_is_empty(lstQ) == FALSE)
+	{
+		u = dcll_extract_min_key(lstQ);
+
+		//walk through adjacency list
+		ph_head = u->ph_list;
+		for(ph_run = ph_head->next; ph_run != ph_head; ph_run = ph_run->next)
+		{
+			v = v_search_node(g->pv_list, ph_run->v); 
+			assert(v);
+			
+			pe_node = en_search_node(g->pe_list, u->v, v->v);
+			assert(pe_node);
+
+			w = pe_node->e.w;
+			b_contains = dcll_contains_node(lstQ, v);
+			if(b_contains == TRUE && v->key > w)
+			{
+				v->pred = u;
+				v->key = w;
+			}
+		}
+	}
+	
 	return (SUCCESS);
 }
 
@@ -400,7 +460,7 @@ bool dcll_is_empty(dcll_list_t *lst)
 	return (FALSE);
 }
 
-vnode_t *dcll_extract_min(dcll_node_t *head)
+vnode_t *dcll_extract_min_d(dcll_node_t *head)
 {
 	dcll_node_t *run = NULL;
 	dcll_node_t *min_node = NULL;
@@ -422,6 +482,43 @@ vnode_t *dcll_extract_min(dcll_node_t *head)
 	return (pv_min);
 }
 
+vnode_t *dcll_extract_min_key(dcll_node_t *head)
+{
+	dcll_node_t *run = NULL;
+	dcll_node_t *min_node = NULL;
+	vnode_t *pv_min = NULL;
+	assert(head);
+
+	run = head->next;
+	min_node = run;
+	while(run != head)
+	{
+		if(min_node->pv_node->key > run->pv_node->key)
+			min_node = run;
+
+		run = run->next;
+	}
+
+	pv_min = min_node->pv_node;
+	dcll_delete_node(min_node);
+	return (pv_min);
+}
+
+bool dcll_contains_node(dcll_node_t *head, vnode_t *pv_search_node)
+{
+	dcll_node_t *run;
+	assert(head);
+	assert(pv_search_node);
+
+	for(run = head->next; run != head; run = run->next)
+	{
+		if(pv_search_node == run->pv_node)
+			return (TRUE);
+	}
+
+	return (FALSE);
+}
+
 void dcll_print(dcll_node_t *head)
 {
 	dcll_node_t *run = NULL;
@@ -431,7 +528,7 @@ void dcll_print(dcll_node_t *head)
 	run = head->next;
 	while(run != head)
 	{
-		printf("[%d(%lf)]<->", run->pv_node->v, run->pv_node->d);
+		printf("[%d(d=%lf, key=%lf)]<->", run->pv_node->v, run->pv_node->d, run->pv_node->key);
 		run = run->next;
 	}
 	printf("[end]\n");

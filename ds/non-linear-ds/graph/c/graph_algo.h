@@ -11,11 +11,17 @@
 #include "graph.h"
 
 /*Interface Routines*/
+//search algo
 res_t depth_first_search(graph_t *g);	//DFS
 res_t breadth_first_search(graph_t *g, vertex_t s);	//BFS
 
-res_t dijkstra(graph_t *g, vertex_t s);
+//shortest path algo
+res_t dijkstra(graph_t *g, vertex_t s);		//s: source for shortest path
 res_t bellman_ford(graph_t *g, vertex_t s);
+
+//MST: minimum spanning tree algo
+res_t mst_prim(graph_t *g, vertex_t r);	//r: root vertex of MST
+void  print_mst(graph_t *g);
 
 /*Auxiliary Routines*/
 void reset(graph_t *g);
@@ -54,8 +60,10 @@ void	    dcll_insert_before(dcll_node_t *before_node, dcll_node_t *new_node); //
 void 	    dcll_insert_end(dcll_node_t *head, dcll_node_t *new_node);
 void	    dcll_insert_node(dcll_node_t *beg, dcll_node_t *mid, dcll_node_t *end);
 void	    dcll_delete_node(dcll_node_t *d_node);
-vnode_t	    *dcll_extract_min(dcll_node_t *head);
+vnode_t	    *dcll_extract_min_d(dcll_node_t *head);
+vnode_t	    *dcll_extract_min_key(dcll_node_t *head);
 bool	    dcll_is_empty(dcll_list_t *lst);
+bool	    dcll_contains_node(dcll_node_t *head, vnode_t *pv_search_node);
 void	    dcll_print(dcll_node_t *head);
 
 #endif /*_GRAPH_ALGO_H_*/

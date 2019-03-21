@@ -56,6 +56,7 @@ struct vnode
 	vertex_t v;
 	color_t color;
 	double d;		//shortest path cost from single source
+	double key;		//minimum wieght of any edge connecting to v to a vertex in tree: MST
 	hlist_t *ph_list;
 	struct vnode *pred;	//predecessor
 	struct vnode *prev;
