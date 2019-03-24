@@ -537,6 +537,52 @@ void en_insert_end(edge_node_t *head, edge_node_t *new_node)
 	en_insert_node(head->prev, new_node, head);
 }
 
+len_t en_length(edge_list_t *pe)
+{
+	int count = 0;
+	edge_node_t *pe_head, *pe_run;
+	assert(pe);
+
+	pe_head = pe;
+	for(pe_run = pe_head->next; pe_run != pe_head; pe_run = pe_run->next)
+	{
+		count++;
+	}
+	return (count);
+}
+
+void en_sort_edge_list(edge_list_t *pe_list)
+{//insertion sort
+	edge_t key;
+	edge_node_t *pe_j, *pe_i;
+	edge_node_t *pe_head;
+	assert(pe_list);
+
+	pe_head = pe_list;
+	for(pe_j = pe_head->next->next; pe_j != pe_head; pe_j = pe_j->next)
+	{
+		pe_i = pe_j->prev;	//i=j-1
+		key.w = pe_j->e.w;	//key = A[j]
+		key.start = pe_j->e.start;
+		key.end = pe_j->e.end;
+
+		while((pe_i != pe_head) && (key.w < pe_i->e.w))
+		{
+			//A[i+1] = A[i]
+			pe_i->next->e.w     = pe_i->e.w;
+			pe_i->next->e.start = pe_i->e.start;
+			pe_i->next->e.end   = pe_i->e.end;
+
+			//i = i-1;
+			pe_i = pe_i->prev;
+		}
+		//A[i+1] = key;
+		pe_i->next->e.w = key.w;
+		pe_i->next->e.start = key.start;
+		pe_i->next->e.end = key.end;
+	}
+}
+
 //Misc aux functions
 void *x_calloc(int nr_elements, int size_per_element)
 {

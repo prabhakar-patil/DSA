@@ -13,6 +13,7 @@
 #include "graph_algo.h"
 
 void test_mst_prims(graph_t *g);
+void test_mst_kruskal(graph_t *g);
 
 int main(void)
 {
@@ -62,6 +63,7 @@ int main(void)
 	print_edges(g);
 
 	test_mst_prims(g);
+	test_mst_kruskal(g);
 
 	rs = destroy_graph(&g);
 	assert(rs == SUCCESS && g == NULL);	
@@ -73,13 +75,30 @@ void test_mst_prims(graph_t *g)
 {
 	vnode_t *pv_head = NULL;
 	vnode_t *pv_run = NULL;
-	res_t rs;
 	vertex_t pred_v;
+	res_t rs;
+	double mst_weight = 0.0;
+
+	/*edge_list_t *pe_mst = NULL; //to get minimum spanning tree
+	edge_node_t *head, *run;
+	double mst_weight = 0.0;*/
 
 	printf("\nMST-PRIM(g, 1):\n");
-	rs = mst_prim(g, 1);
+	rs = mst_prim(g, 1, NULL);
 	assert(rs == SUCCESS);
 	
+	/*head = pe_mst;
+	printf("EDGE-LIST: [beg]<->");
+	for(run = head->next; run != head; run = run->next)
+	{
+		mst_weight = mst_weight + run->e.w;
+		printf("[%d-%d](%lf)]<->", run->e.start, run->e.end, run->e.w);
+	}
+	printf("[end] ---> [totW=%lf]\n", mst_weight);
+
+	rs = en_destroy_list(&pe_mst);
+	assert(rs == SUCCESS && pe_mst == NULL);*/
+
 	pv_head = g->pv_list;
 	for(pv_run = pv_head->next; pv_run != pv_head; pv_run = pv_run->next)
 	{
@@ -88,7 +107,34 @@ void test_mst_prims(graph_t *g)
 		else //no predecessor, must be source node
 			pred_v = -1;
 
+		mst_weight = mst_weight + pv_run->key;
 		printf("[%d]:(key:%lf)(pred:%d)\n", pv_run->v, pv_run->key, pred_v);
 	}
+	printf("-------------------------\n");
+	printf("->TotWt: %lf\n", mst_weight);
 }
 
+void test_mst_kruskal(graph_t *g)
+{
+	res_t rs;
+	edge_list_t *pe_mst = NULL;
+	edge_node_t *head, *run;
+	double mst_weight = 0.0;
+
+	printf("\nMST-KRUSKAL(g):\n");
+
+	rs = mst_kruskal(g, &pe_mst);
+	assert(rs == SUCCESS && pe_mst != NULL);
+	
+	head = pe_mst;
+	printf("EDGE-LIST: [beg]<->");
+	for(run = head->next; run != head; run = run->next)
+	{
+		mst_weight = mst_weight + run->e.w;
+		printf("[%d-%d](%lf)]<->", run->e.start, run->e.end, run->e.w);
+	}
+	printf("[end] ---> [totW=%lf]\n", mst_weight);
+
+	rs = en_destroy_list(&pe_mst);
+	assert(rs == SUCCESS && pe_mst == NULL);
+}

@@ -4,12 +4,12 @@ CFLAGS=-Wall
 LFLAGS=
 DEBUG_FLAGS=-g
 
-SRCS=graph.c graph_algo.c
+SRCS=graph.c graph_algo.c disjoint_set.c
 SRC_BASIC_CLIENT=client_base_graph.c
 SRC_ALGO_DFS_BFS_CLIENT=client_algo_dfs_bfs.c
 SRC_ALGO_SHORTEST_PATH_CLIENT=client_algo_shortest_path.c
 SRC_ALGO_MST_CLIENT=client_algo_mst.c
-HDRS=graph.h graph_algo.h
+HDRS=graph.h graph_algo.h disjoint_set.h
 EXE=app
 EXED=appd
 

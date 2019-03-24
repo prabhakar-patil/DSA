@@ -20,13 +20,15 @@ res_t dijkstra(graph_t *g, vertex_t s);		//s: source for shortest path
 res_t bellman_ford(graph_t *g, vertex_t s);
 
 //MST: minimum spanning tree algo
-res_t mst_prim(graph_t *g, vertex_t r);	//r: root vertex of MST
+res_t mst_prim(graph_t *g, vertex_t r, edge_list_t **pp_spanning_tree);	//r: root vertex of MST
+res_t mst_kruskal(graph_t *g, edge_list_t **pp_spanning_tree);
 void  print_mst(graph_t *g);
 
 /*Auxiliary Routines*/
 void reset(graph_t *g);
 void dfs_visit(graph_t *g, vnode_t *u); //recursive function
 
+//for dijkstras and bellman-ford
 void initialize_single_source(graph_t *g, vertex_t s);
 void relax(vnode_t *u, vnode_t *v, double w);	//w: w(u,v): weight of edge/path(?) u to v
 
@@ -53,6 +55,7 @@ res_t  	dequeue(queue_t *q, vnode_t **ppv_node);
 bool 	is_queue_empty(queue_t *q);
 res_t	sort_queue(queue_t *q, queue_t **pp_sorted_queue);
 
+//dcll implementations
 dcll_list_t *dcll_create_list();
 void 	    dcll_destroy_list(dcll_list_t **pp);
 dcll_node_t *dcll_get_node(vnode_t *pv);

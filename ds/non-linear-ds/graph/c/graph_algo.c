@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "graph_algo.h"
+#include "disjoint_set.h"
 
 /*Interface Routines*/
 res_t depth_first_search(graph_t *g)
@@ -167,13 +168,16 @@ res_t bellman_ford(graph_t *g, vertex_t s)
 }
 
 //MST Algorithms
-res_t mst_prim(graph_t *g, vertex_t r)
+res_t mst_prim(graph_t *g, vertex_t r, edge_list_t **pp_spanning_tree)
 {
 	vnode_t *pv_head, *pv_run;
 	vnode_t *pv_mst_root = NULL;
 	vnode_t *u = NULL, *v = NULL;
 	hnode_t *ph_head, *ph_run;  //for adjacency list
-	edge_node_t *pe_node = NULL;
+	edge_node_t *pe_u_v = NULL;
+	//edge_list_t *pe_mst = NULL;	//mimimum spanning tree
+	//edge_node_t *pe_mst_v_vPred = NULL; //MST edge 
+	//edge_t light_edge;
 	dcll_node_t *lstQ = NULL;
 	bool b_contains;
 	double w;
@@ -182,6 +186,12 @@ res_t mst_prim(graph_t *g, vertex_t r)
 	pv_mst_root = v_search_node(g->pv_list, r);
 	if(pv_mst_root == NULL)
 		return (DATA_NOT_FOUND);
+
+	//00. Create edge list data structure to save minimum spanning tree edges and return it to caller
+	//pe_mst = en_create_list();
+	/*light_edge.w = INFINITY;
+	light_edge.start = -1; 
+	light_edge.end = -1;*/
 
 	//01. Create Priority Q, we are using list data structure to exctract minimum 'key' valued vnode
 	lstQ = dcll_create_list();
@@ -210,23 +220,108 @@ res_t mst_prim(graph_t *g, vertex_t r)
 			v = v_search_node(g->pv_list, ph_run->v); 
 			assert(v);
 			
-			pe_node = en_search_node(g->pe_list, u->v, v->v);
-			assert(pe_node);
+			pe_u_v = en_search_node(g->pe_list, u->v, v->v);
+			assert(pe_u_v);
 
-			w = pe_node->e.w;
-			b_contains = dcll_contains_node(lstQ, v);
+			w = pe_u_v->e.w;				// w(u,v)
+			b_contains = dcll_contains_node(lstQ, v);	// if(v belongs Q)
 			if(b_contains == TRUE && v->key > w)
 			{
 				v->pred = u;
 				v->key = w;
+				
+				/*//this for MST edges
+				if(light_edge.w > w)
+				{
+					light_edge.w = w;
+					light_edge.start = u->v;
+					light_edge.end = v->v;
+				}*/		
 			}
+
 		}
+
+		/*//to form MST edge list
+		if(light_edge.w != INFINITY)
+		{
+			//pe_mst_v_vPred = en_get_node(pe_u_v->e.start, pe_u_v->e.end, pe_u_v->e.w);
+			pe_mst_v_vPred = en_get_node(light_edge.start, light_edge.end, light_edge.w);
+			en_insert_end(pe_mst, pe_mst_v_vPred); 	
+			//reset light edge
+			light_edge.w = INFINITY;
+			light_edge.start = -1; 
+			light_edge.end = -1;
+		}*/
+
 	}
+
+	/*if(pp_spanning_tree)
+		*pp_spanning_tree = pe_mst;*/
+
 	
 	return (SUCCESS);
 }
 
+res_t mst_kruskal(graph_t *g, edge_list_t **pp_spanning_tree)
+{
+	edge_list_t *pe_mst = NULL;
+	edge_node_t *p_new_edge_node = NULL;
+	djs_collection_t *pdjsc = NULL;
+	djs_t *u = NULL;
+	djs_t *v = NULL;
+	vnode_t *pv_head, *pv_run;
+	edge_list_t *pe_head, *pe_run;
+	res_t rs;
+
+	assert(g);
+	assert(pp_spanning_tree);
+
+	pe_mst = en_create_list();
+	pdjsc = create_disjoint_set_collection();
+
+	//01. make-set of all vertices
+	pv_head = g->pv_list;
+	for(pv_run = pv_head->next; pv_run != pv_head; pv_run = pv_run->next)
+	{
+		rs = make_set(pdjsc, pv_run->v);
+		assert(rs == SUCCESS);
+	}
+
+	//02. sort edge_list for next subsequent traversal steps
+	en_sort_edge_list(g->pe_list);
+	//printf("SORTED-EDGES: ");
+	//print_edges(g);	
+	
+	//03. take each edge from edge_list, which is sorted in step2
+	pe_head = g->pe_list;
+	for(pe_run = pe_head->next; pe_run != pe_head; pe_run = pe_run->next)
+	{
+		u = find_set(pdjsc, pe_run->e.start);
+		v = find_set(pdjsc, pe_run->e.end);
+		if(u != v)
+		{
+			//printf("FIND-SET(u=%d) != FIND-SET(v=%d)\n", pe_run->e.start, pe_run->e.end); //for debugging
+			p_new_edge_node = en_get_node(pe_run->e.start, pe_run->e.end, pe_run->e.w);
+			en_insert_end(pe_mst, p_new_edge_node);
+
+			union_set(pdjsc, u, v);
+		}		
+		/*else //for debugging
+		{
+			printf("FIND-SET(u=%d) == FIND-SET(v=%d)\n", pe_run->e.start, pe_run->e.end);
+		}*/
+	}
+
+	*pp_spanning_tree = pe_mst;
+
+	rs = destroy_disjoint_set_collection(&pdjsc);
+	assert(rs == SUCCESS && pdjsc == NULL);
+
+	return (SUCCESS);
+}
+
 /*Auxiliary Routines*/
+//for dfs
 void reset(graph_t *g)
 {
 	vnode_t *pv_head = NULL;
@@ -266,6 +361,7 @@ void dfs_visit(graph_t *g, vnode_t *u)
 	u->color = BLACK;
 }
 
+//for shortest path algo- dijktras and bellman-ford
 void initialize_single_source(graph_t *g, vertex_t s)
 {
 	vnode_t *pv_head = NULL;

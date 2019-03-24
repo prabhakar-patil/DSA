@@ -132,6 +132,8 @@ edge_node_t *en_search_node(edge_node_t *head, vertex_t v_start, vertex_t v_end)
 void	    en_delete_node(edge_node_t *d_node);
 void	    en_insert_node(edge_node_t *beg, edge_node_t *mid, edge_node_t *end);
 void	    en_insert_end(edge_node_t *head, edge_node_t *new_node);
+len_t	    en_length(edge_list_t *pe);
+void        en_sort_edge_list(edge_list_t *pe_list);
 
 void *x_calloc(int nr_elements, int size_per_element);
 
