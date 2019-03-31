@@ -15,7 +15,7 @@ $(EXE): $(SRCS) $(HDRS)
 debug: $(SRCS) $(HDRS)
 	$(CC) -o $(EXED) $(CFLAGS) $(DEBUGFLAG) $(SRCS)
 clean:
-	rm -f $(EXE)
+	rm -f $(EXE) $(EXED)
 	  
 
 

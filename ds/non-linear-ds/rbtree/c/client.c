@@ -20,13 +20,21 @@ int main(void)
 	//res = predecessor(rbt, 100, &d);
 	//assert(res == BST_NO_PREDECESSOR);
 	//printf("SUCCESSOR(100)=NO_PREDECESSOR\n");
+	printf("INSERT(50)\n");
 	insert_rbt(rbt, 50);
+	printf("INSERT(25)\n");
 	insert_rbt(rbt, 25);
+	printf("INSERT(75)\n");
 	insert_rbt(rbt, 75);
+	printf("INSERT(65)\n");
 	insert_rbt(rbt, 65);
+	printf("INSERT(150)\n");
 	insert_rbt(rbt, 150);
+	printf("INSERT(125)\n");
 	insert_rbt(rbt, 125);
+	printf("INSERT(130)\n");
 	insert_rbt(rbt, 130);
+	printf("INSERT(175)\n");
 	insert_rbt(rbt, 175);
 
 	assert(search_rbt(rbt, 75) == TRUE);
@@ -85,7 +93,7 @@ int main(void)
 	printf("POSTORDER-NRC: Implementation In Progress\n");
 	//postorder_nrc(rbt);
 */	
-	//printf("DELETE(75)\n");
+/*	//printf("DELETE(75)\n");
 	//res = delete_rbt(rbt, 75);
 	//printf("DELETE(125)\n");
 	//res = delete_rbt(rbt, 125);
@@ -93,14 +101,14 @@ int main(void)
 	//res = delete_rbt(rbt, 50);
 	printf("DELETE(100)\n");
 	res = delete_rbt(rbt, 100);
-	assert(res == SUCCESS);
+	assert(res == SUCCESS);	
 	printf("IN-ORDER  : ");
 	inorder(rbt);
 	printf("PRE-ORDER : ");
 	preorder(rbt);
 	printf("POST-ORDER: ");
 	postorder(rbt);
-
+*/
 	assert(destroy_rbt(&rbt) == SUCCESS && rbt == NULL);
 
 	exit(EXIT_SUCCESS);

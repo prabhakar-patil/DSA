@@ -26,7 +26,45 @@ res_t destroy_rbt(rbt_t **pp)
 	return (SUCCESS);
 }
 
+//new version of insert_rbt as per Cormen book
 res_t insert_rbt(rbt_t *t, data_t n_data)
+{
+	rbt_node_t *new_node = NULL;
+	rbt_node_t *x, *y;
+	assert(t);
+
+	//if n_data exist
+	new_node = search_rbt_node(t, n_data);
+	if(new_node != t->nil)
+		return (DATA_EXIST);
+
+	y = t->nil;
+	x = t->root;
+	while(x != t->nil)
+	{
+		y = x;
+		if(n_data < x->data)
+			x = x->left;
+		else //n_data > x->data
+			x = x->right;
+	}
+	new_node = get_rbt_node(t->nil, n_data);
+	new_node->parent = y;
+	if(y == t->nil)
+		t->root = new_node;	//tree was empty 
+	else if(new_node->data < y->data)
+		y->left = new_node;
+	else //if (new_node->data > y->data)
+		y->right = new_node;
+
+	t->nr_elements += 1;
+
+	insert_fixup(t, new_node);
+	return (SUCCESS);
+}
+
+//old version of insert_rbt
+/*res_t insert_rbt(rbt_t *t, data_t n_data)
 {
 	rbt_node_t *new_node = NULL;
 	rbt_node_t *root = NULL;
@@ -79,7 +117,7 @@ res_t insert_rbt(rbt_t *t, data_t n_data)
 			}
 		}
 	}
-}
+}*/
 
 res_t delete_rbt(rbt_t *t, data_t d_data)
 {
@@ -89,25 +127,17 @@ res_t delete_rbt(rbt_t *t, data_t d_data)
 	del_node = search_rbt_node(t, d_data);
 	if(del_node == t->nil)
 		return (DATA_NOT_FOUND);
-	//case1: del_node has no LST and no RST
-	/*if(del_node->left == t->nil && del_node->right == t->nil)
-	{
-		if(del_node->parent->left == del_node)
-			del_node->parent->left = t->nil;
-		else
-			del_node->parent->right = t->nil;
-	}
-	//case2: del_node has no LST
-	else*/ if(del_node->left == t->nil)
+	//case1: del_node has no LST
+	if(del_node->left == t->nil)
 	{
 		transplant(t, del_node, del_node->right);
 	}
-	//case3: del_node has no RST
+	//case2: del_node has no RST
 	else if(del_node->right == t->nil)
 	{
 		transplant(t, del_node, del_node->left);
 	}
-	//case4: del_node has both LST and RST
+	//case3: del_node has both LST and RST
 	else
 	{	//find min(del_node's RST)  and do transplant
 		//but before doing that, check if del_node != min(del_node->right).parent
@@ -219,6 +249,119 @@ res_t predecessor(rbt_t *t, data_t whose_predecessor, data_t *p_predecessor)
 
 /******************* Auxillury Routines *************************/
 
+void insert_fixup(rbt_t *t, rbt_node_t *z)
+{
+	/* INVARIANT:
+	 * a. Node z is RED node
+	 * b. If z.p is root, then z.p color is BLACK
+	 * c. There can be at most one property violation, Propery2 or Property4.
+	 *    Property2 voilation: Because z itself is root-->correct by t->root->color = BLACK
+	 *    Property4 voilation: Both z and z.p are RED
+	 * */
+	rbt_node_t *y = NULL;
+	assert(t && z);
+
+	while(z->parent->color == RED)
+	{
+		if(z->parent == z->parent->parent->left)
+		{
+			y = z->parent->parent->right;		//get uncle of z into y
+			if(y->color == RED)			//case1
+			{
+				z->parent->color = BLACK;	
+				y->color 	 = BLACK;
+				z->parent->parent->color = RED;
+				z = z->parent->parent;
+			}
+			else 
+			{
+				if(z == z->parent->right)	//case2
+				{
+					z = z->parent;
+					left_rotate(t, z);
+				}
+				z->parent->color = BLACK;	//case3
+				z->parent->parent->color = RED; //case3
+				right_rotate(t, z->parent->parent); //case3
+			}	
+		}
+		else //if(z.p == z.p.p.r)
+		{//Replica of above if, with left <-> right exchange
+			y = z->parent->parent->left;		//get uncle of z into y
+			if(y->color == RED)			//case1
+			{
+				z->parent->color = BLACK;
+				y->color 	 = BLACK;
+				z->parent->parent->color = RED;
+				z = z->parent->parent;
+			}
+			else 
+			{	
+				if(z == z->parent->left)	//case2
+				{
+					z = z->parent;
+					right_rotate(t, z);
+				}
+				z->parent->color = BLACK;	//case3
+				z->parent->parent->color = RED;	//case3
+				left_rotate(t, z->parent->parent); //case3
+			}
+		}
+	}
+	t->root->color = BLACK;
+}
+
+void left_rotate(rbt_t *t, rbt_node_t *x)
+{
+	rbt_node_t *y = NULL;
+	assert(t && x);
+	assert(x->right != t->nil);
+
+	y = x->right;
+	
+	x->right = y->left;
+	if(y->left != t->nil)
+		y->left->parent = x;
+	
+	y->parent = x->parent;	//link x's parent to y
+	
+	//put y to x's parent->left/right based on x's previous condition. Or check if x is root
+	if(x->parent == t->nil)
+		t->root = y;
+	else if(x->parent->left == x)
+		x->parent->left = y;
+	else //if(x->parent->right == x)
+		x->parent->right = y;
+	
+			
+	y->left = x;	//put x on y's left			
+	x->parent = y;	//make y as x's parent
+}
+
+void right_rotate(rbt_t *t, rbt_node_t *x)
+{
+	rbt_node_t *y = NULL;
+	assert(t && x);
+	assert(x->left != t->nil);
+
+	y = x->left;
+	
+	x->left = y->right;  //turn y'x RST into x's LST
+	if(y->right != t->nil)
+		y->right->parent = x;	
+
+	y->parent = x->parent;	//link x's parent to y
+	if(x->parent == t->nil)
+		t->root = y;
+	else if(x->parent->left == x)
+		x->parent->left = y;
+	else if(x->parent->right == x)
+		x->parent->right = y;
+
+	y->right = x;	//put x on y's right
+	x->parent = y;	//make y as x's parent
+}
+
 void transplant(rbt_t *t, rbt_node_t *u, rbt_node_t *v)
 {
 	assert(t && u && v);
@@ -323,7 +466,7 @@ void _inorder(rbt_t *t, rbt_node_t *node)
 	if(node != t->nil)
 	{
 		_inorder(t, node->left);
-		printf("[%d]<->", node->data);
+		printf("[%d(%c)]<->", node->data, node->color==RED?'R':'B');
 		_inorder(t, node->right);
 	}
 }
@@ -333,7 +476,7 @@ void _preorder(rbt_t *t, rbt_node_t *node)
 	assert(t && node);
 	if(node != t->nil)
 	{
-		printf("[%d]<->", node->data);
+		printf("[%d(%c)]<->", node->data, node->color==RED ? 'R':'B');
 		_preorder(t, node->left);
 		_preorder(t, node->right);
 	}
@@ -347,7 +490,7 @@ void _postorder(rbt_t *t, rbt_node_t *node)
 	{
 		_postorder(t, node->left);
 		_postorder(t, node->right);
-		printf("[%d]<->", node->data);
+		printf("[%d(%c)]<->", node->data, node->color==RED?'R':'B');
 	}
 }
 
