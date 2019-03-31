@@ -1,0 +1,16 @@
+Defination of BST:
+Let T be an arbitrary binary tree
+P1: for all node: a node belong to T -> node itself is root node
+P2: for all node belonging to T ^ for all node' belonging to LST(left subtree) : node'.data <= node.data
+P3: for all node belonging to T ^ for all node' belonging to RST(right subtree): node'.data >  node.data
+
+
+
+
+		     	        100
+			      /     \
+			     50     150
+		            /  \   /   \
+		           25  75 125  175
+			       /    \
+                              65    130
