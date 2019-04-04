@@ -93,14 +93,14 @@ int main(void)
 	printf("POSTORDER-NRC: Implementation In Progress\n");
 	//postorder_nrc(rbt);
 */	
-/*	//printf("DELETE(75)\n");
-	//res = delete_rbt(rbt, 75);
+	printf("DELETE(75)\n");
+	res = delete_rbt(rbt, 75);
 	//printf("DELETE(125)\n");
 	//res = delete_rbt(rbt, 125);
 	//printf("DELETE(50)\n");
 	//res = delete_rbt(rbt, 50);
-	printf("DELETE(100)\n");
-	res = delete_rbt(rbt, 100);
+	//printf("DELETE(100)\n");
+	//res = delete_rbt(rbt, 100);
 	assert(res == SUCCESS);	
 	printf("IN-ORDER  : ");
 	inorder(rbt);
@@ -108,7 +108,7 @@ int main(void)
 	preorder(rbt);
 	printf("POST-ORDER: ");
 	postorder(rbt);
-*/
+
 	assert(destroy_rbt(&rbt) == SUCCESS && rbt == NULL);
 
 	exit(EXIT_SUCCESS);

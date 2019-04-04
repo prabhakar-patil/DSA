@@ -72,6 +72,7 @@ rbt_node_t *_predecessor(rbt_t *t, rbt_node_t *node);
 void left_rotate(rbt_t *t, rbt_node_t *x);
 void right_rotate(rbt_t *t, rbt_node_t *x);
 void insert_fixup(rbt_t *t, rbt_node_t *new_node);
+void delete_fixup(rbt_t *t, rbt_node_t *x);	//x is such root of subtree, which is taking place of y(node to be deleted or promoted) 
 
 void       *x_calloc(int nr_elements, int size_per_element);
 

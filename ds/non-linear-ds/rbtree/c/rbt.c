@@ -121,41 +121,59 @@ res_t insert_rbt(rbt_t *t, data_t n_data)
 
 res_t delete_rbt(rbt_t *t, data_t d_data)
 {
-	rbt_node_t *del_node = NULL;
-	rbt_node_t *u,*v;
+	rbt_node_t *z;	//z = node to be deleted
+	rbt_node_t *y;	//y = node to be deleted(y=z), or node to be promoted(y=successor(z))
+	rbt_node_t *x;	//x = node to be taking y's original place 
+	color_t y_original_color;
 	assert(t);
-	del_node = search_rbt_node(t, d_data);
-	if(del_node == t->nil)
+	z = search_rbt_node(t, d_data);
+	if(z == t->nil)
 		return (DATA_NOT_FOUND);
-	//case1: del_node has no LST
-	if(del_node->left == t->nil)
+	y = z;
+	y_original_color = y->color;
+	//case1: delete node has no LST
+	if(z->left == t->nil)
 	{
-		transplant(t, del_node, del_node->right);
+		printf("delete_rbt(): z->left==t->NIL\n");
+		x = z->right;
+		transplant(t, z, z->right);
 	}
-	//case2: del_node has no RST
-	else if(del_node->right == t->nil)
+	//case2: delete node has no RST
+	else if(z->right == t->nil)
 	{
-		transplant(t, del_node, del_node->left);
+		printf("delete_rbt(): z->right==t->NIL\n");
+		x = z->right;
+		x = z->left;
+		transplant(t, z, z->left);
 	}
-	//case3: del_node has both LST and RST
+	//case3: delete node has both LST and RST
 	else
-	{	//find min(del_node's RST)  and do transplant
-		//but before doing that, check if del_node != min(del_node->right).parent
-		//then do transplant for min(del_node's RST).root and that root's RST
-		u = del_node;
-	        v = _minimum(t, del_node->right);
-		if(u != v->parent)	
+	{	//find min(z's RST)  and do transplant
+		//but before doing that, check if z != min(z->right).parent
+		//then do transplant for min(z's RST).root and that root's RST
+		printf("delete_rbt(): RST & LST present\n");
+	        y = _minimum(t, z->right);
+		y_original_color = y->color;
+		x = y->right;
+		if(z == y->parent)
 		{
-			transplant(t, v, v->right);
-			v->right = u->right;		
-			v->right->parent = v;	//or u->right->parent = v
+			x->parent = y;
 		}
-		transplant(t, u, v);
-		v->left = u->left;
-		v->left->parent = v;		//or u->left->parent = v
+		else	
+		{
+			transplant(t, y, y->right);
+			y->right = z->right;		
+			y->right->parent = y;	//or z->right->parent = y
+		}
+		transplant(t, z, y);
+		y->left = z->left;
+		y->left->parent = y;	//or z->left->parent = y
+		y->color = z->color;	//y will take z's color
 	}
-	free(del_node);
 
+	if(y_original_color == BLACK)
+		delete_fixup(t, x);
+	free(z);
 	return (SUCCESS);
 }
 
@@ -248,6 +266,86 @@ res_t predecessor(rbt_t *t, data_t whose_predecessor, data_t *p_predecessor)
 }
 
 /******************* Auxillury Routines *************************/
+
+void delete_fixup(rbt_t *t, rbt_node_t *x)
+{
+	rbt_node_t *w; //sibling of x
+	assert(x);
+	while(x != t->root && x->color == BLACK)	
+	{
+		if(x == x->parent->left)
+		{
+			w = x->parent->right;	//how w exist or how it cannot be t->nil? Ans: ???? 
+			if(w->color == RED)	//case1
+			{
+				printf("delete_fixup(): case1\n");
+				w->color = BLACK;
+				x->parent->color = RED;
+				left_rotate(t, x->parent);
+				w = x->parent->right;
+			}
+			else if(w->left->color == BLACK && w->right->color == BLACK)	//case2
+			{
+				printf("delete_fixup(): case2\n");
+				w->color = RED;	//case2
+				x = x->parent;	//case2
+			}	
+			else
+			{
+				if(w->right->color == BLACK)	//case3: situations created such way which are suitable for case4
+				{
+					printf("delete_fixup(): case3\n");
+					w->left->color = BLACK;
+					w->color = RED;
+					right_rotate(t, w);
+					w = x->parent->right;
+				}
+				printf("delete_fixup(): case4\n");
+				w->color = x->parent->color;	//case4
+				x->parent->color = BLACK;	//case4
+				w->right->color = BLACK;	//case4
+				left_rotate(t, x->parent);	//case4
+				x = t->root;			//case4: to break master while loop	
+			}
+		}
+		else //x == x.p.r
+		{
+			w = x->parent->left;
+			if(w->color == RED)	//case1
+			{
+				printf("delete_fixup(): case1\n");
+				w->color = BLACK;
+				x->parent->color = RED;
+				right_rotate(t, x->parent);
+				w = x->parent->left;
+			}
+			else if(w->left->color == BLACK && w->right->color == BLACK)	//case2
+			{
+				printf("delete_fixup(): case2\n");
+				w->color = RED;	//case2
+				x = x->parent;	//case2
+			}
+			else 
+			{
+				if(w->left->color == BLACK)	//case3: situations created such way which are suitable for case4
+				{
+					printf("delete_fixup(): case3\n");
+					w->right->color = BLACK;
+					w->color = RED;
+					left_rotate(t, w);
+					w = x->parent->left;
+				}
+				printf("delete_fixup(): case4\n");
+				w->color = x->parent->color;	//case4
+				x->parent->color = BLACK;	//case4
+				w->left->color = BLACK;		//case4
+				right_rotate(t, x->parent);	//case4
+				x = t->root;			//case4: to break master while loop
+			}
+		}
+	}
+	x->color = BLACK;
+}
 
 void insert_fixup(rbt_t *t, rbt_node_t *z)
 {
@@ -379,8 +477,7 @@ void transplant(rbt_t *t, rbt_node_t *u, rbt_node_t *v)
 		u->parent->right = v;
 	}
 
-	if(v != t->nil)
-		v->parent = u->parent;
+	v->parent = u->parent;
 }
 
 rbt_node_t *_successor(rbt_t *t, rbt_node_t *node)
