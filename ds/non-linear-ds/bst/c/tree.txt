@@ -7,10 +7,10 @@ P3: for all node belonging to T ^ for all node' belonging to RST(right subtree):
 
 
 
-				    100
+                                100
 			      /     \
 			     50     150
-		        /  \   /   \
-		       25  75 125  175
-			       /    \
-                  65    130
+                            /  \   /   \
+                           25  75 125  175
+                               /   \
+                              65   130
